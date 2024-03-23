@@ -9,6 +9,8 @@ tmp/
 *.tmp
 *.bak
 *.swp
+*.snap
+*.xmi
 *~.nib
 local.properties
 .settings/
