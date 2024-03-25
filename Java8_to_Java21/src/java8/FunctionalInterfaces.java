@@ -12,6 +12,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+/**
+ * Any local variable in order to be used by a lambda expression must be final
+ * or effectively final(not marked 'final', but are not being modified by the
+ * method), as lambda takes the snapshot of the local variables. LAMBDA IT SELF
+ * MAY CHANGE THE VARIABLE BUT NOT OTHERS
+ */
 public class FunctionalInterfaces {
 	public static void main(String[] args) {
 
@@ -21,7 +27,8 @@ public class FunctionalInterfaces {
 //		supplier();
 //		function();
 //		unaryOperator();
-		binaryOperator();
+//		binaryOperator();
+//		lambdaUsingLocalVariables();
 
 //		IntPredicate isEven = number -> number%2==0;	
 	}
@@ -116,5 +123,30 @@ public class FunctionalInterfaces {
 
 		System.out.println(toLowerCaseAndConcat.apply("Super ", "MAN")); // super man
 		System.out.println(toLowerCaseAndConcat.apply("ToM ", "RiDDle")); // tom riddle
+	}
+
+	/***
+	 * <li>Here the variable 'x' is not final but it is effectively final(not marked
+	 * 'final' but behaves as final) because it is being used by the lambda
+	 * expression than thus once initialized its value can not be changed, neither
+	 * in the lambda nor outside it.<br>
+	 * <li>Local variable x defined in an enclosing scope must be final or
+	 * effectively final :: is given by the lambda expression when the value of used
+	 * variable by the lambda is changed
+	 */
+	public static void lambdaUsingLocalVariables() {
+		int x = 12;
+//		x = 51; // !!!!
+
+		Predicate<String> lengthPrinter = s -> {
+//			x++; // !!!!
+			System.out.println("counter:" + x);
+			return false;
+		};
+
+//		x++; // !!!! 
+		lengthPrinter.test("sample string");
+
+		return;
 	}
 }
