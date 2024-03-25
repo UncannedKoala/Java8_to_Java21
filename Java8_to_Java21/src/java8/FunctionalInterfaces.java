@@ -28,7 +28,7 @@ public class FunctionalInterfaces {
 //		function();
 //		unaryOperator();
 //		binaryOperator();
-		lambdaUsingLocalVariables();
+//		lambdaUsingLocalVariables();
 
 //		IntPredicate isEven = number -> number%2==0;	
 	}
@@ -130,8 +130,9 @@ public class FunctionalInterfaces {
 	 * 'final' but behaves as final) because it is being used by the lambda
 	 * expression than thus once initialized its value can not be changed, neither
 	 * in the lambda nor outside it.<br>
-	 * <li>Local variable x defined in an enclosing scope must be final or effectively
-	 * final :: is given by the lambda expression when the value of used variable by the lambda is changed
+	 * <li>Local variable x defined in an enclosing scope must be final or
+	 * effectively final :: is given by the lambda expression when the value of used
+	 * variable by the lambda is changed
 	 */
 	public static void lambdaUsingLocalVariables() {
 		int x = 12;
