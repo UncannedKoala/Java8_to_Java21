@@ -24,7 +24,7 @@ public class FunctionalInterfaces {
 //		customPredicate();
 //		predicate();
 //		consumer();
-//		supplier();
+		supplier();
 //		function();
 //		unaryOperator();
 //		binaryOperator();
@@ -36,6 +36,7 @@ public class FunctionalInterfaces {
 	public static void customPredicate() {
 		FunctionConsumer f = obj -> obj == null;
 		System.out.println(f.isNull(null));
+		System.out.println(f.isNull("Stri"));
 		System.out.println(FunctionConsumer.getName());
 	}
 

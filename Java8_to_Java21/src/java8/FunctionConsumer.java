@@ -2,6 +2,7 @@ package java8;
 
 @FunctionalInterface
 public interface FunctionConsumer {
+	
 	public boolean isNull(Object obj);
 
 	/**
