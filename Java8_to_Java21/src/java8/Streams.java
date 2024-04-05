@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -14,13 +15,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+
+import java8.utility.Person;
 
 /**
  * <ul>
@@ -99,15 +102,18 @@ import java.util.stream.Stream;
  */
 public class Streams {
 	public static void main(String[] args) {
-		// streamCreation();
-		// streamOperation();
-		// mapToStream();
-		// readFilesUsingStreams();
-		// infiniteStreams();
+//		streamCreation();
+//		streamOperation();
+//		mapToStream();
+//		readFilesUsingStreams();
+//		infiniteStreams();
 
-		// terminalOperations();
-		collect_TerminalOperation();
-		// snippets();
+//		 terminalOperations();
+//		 collect_TerminalOperation();
+
+		intermediateOperators();
+
+//		 snippets();
 	}
 
 	/*
@@ -561,7 +567,7 @@ public class Streams {
 		 */
 
 		/**
-		 * Collectors.toMaptoMap( <br>
+		 * Collectors.toMap( <br>
 		 * Function<? super T, ? extends K> keyMapper, <br>
 		 * Function<? super T, ? extends U> valueMapper <br>
 		 * )
@@ -672,8 +678,151 @@ public class Streams {
 				.collect(Collectors.partitioningBy(number -> number > 50, Collectors.toSet()));
 		System.out.println(integerValuesOver50_set); // {false=[20, 40, 10], true=[80, 60]} instead of
 														// {false=[10, 20, 40, 20, 40, 10], true=[80, 60, 80]}
-		
-		
+
+	}
+
+	/**
+	 * Always return a Stream
+	 */
+	public static void intermediateOperators() {
+		List<String> sweetList = List.of("cake", "pastry", "pies", "tarts", "wafer", "timbale");
+		List<String> names = List.of("Pat", "Kate", "Jim", "James", "Ron", "Romilda", "Jane", "Kate", "Joe", "Choe",
+				"Ginny");
+		List<Integer> intList = List.of(10, 20, 30, 40, 50, 60, 70, 80, 90);
+		List<Integer> randomIntList = List.of(10, 20, 80, 40, 20, 60, 40, 80, 10);
+		List<Long> longList = List.of(100l, 200l, 300l, 400l, 500l, 600l, 700l, 800l, 900l);
+		List<Double> doubleList = List.of(10.3, 19.7, 30.2, 39.8, 50.1, 60.0, 69.9, 80.0, 90.0, 100.00);
+
+//		 * ########################Collectors.partitionBy()########################
+
+		/*
+		 * #########################.filter(Predicate<T>)#########################
+		 */
+		/**
+		 * returns the streams of elements for whom the predicate returns 'true'
+		 * 
+		 * Stream<T> filter(Predicate<? super T> predicate)
+		 */
+//		Filtering stream to contain only sweet names with length > 4
+		List<String> sweetNames_moreThan4length = sweetList.stream().filter((sweet) -> sweet.length() > 4)
+				.collect(Collectors.toList());
+		System.out.println(sweetNames_moreThan4length); // [pastry, tarts, wafer, timbale]
+
+		/*
+		 * ##############################.distinct()##############################
+		 */
+		/**
+		 * distinct() is a stateful intermediate operation that behaves similar to a
+		 * filter. <br>
+		 * It internally uses .equals() and thus, it is case-sensitive.
+		 * 
+		 * Stream<T> distinct()
+		 */
+//		Getting all the distinct values of the Stream<Integer>
+		System.out.println(randomIntList.stream().distinct().collect(Collectors.toList())); // [10, 20, 80, 40, 60];
+
+		/*
+		 * ################################.limit()################################
+		 */
+		/**
+		 * limit() is a stateful short-circuiting intermediate operation.
+		 * 
+		 * Stream<T> limit(long maxSize)
+		 */
+//		Getting only first 2 even number in the List<Double>
+		List<Double> first2EvenNumbers = doubleList.stream().filter(num -> num % 2 == 0).limit(2)
+				.collect(Collectors.toList());
+		System.out.println("first2EvenNumbers: " + first2EvenNumbers); // first2EvenNumbers: [60.0, 80.0]
+
+		/*
+		 * ##################################.map()##################################
+		 */
+		/**
+		 * map() is used to 'Transform data'
+		 * 
+		 * <R> Stream<R> map(Function<? super T, ? extends R> mapper)
+		 */
+//		mapping/replacing the sweet names with the initial alphabet
+		List<Character> sweetIntitals = sweetList.stream().map(sweet -> sweet.charAt(0)).collect(Collectors.toList());
+		System.out.println(sweetIntitals); // [c, p, p, t, w, t]
+
+		/*
+		 * ################################.flatMap()################################
+		 */
+		/**
+		 * Returns a stream containing all the underlying stream elements
+		 */
+//		Creating a stream that has all the elements of underlying Streams in 'List<Stream<Integer>>'
+		List<Integer> allIntList = Stream.of(intList, randomIntList).flatMap(list -> list.stream())
+				.collect(Collectors.toList());
+		System.out.println(allIntList); // [10, 20, 30, 40, 50, 60, 70, 80, 90, 10, 20, 80, 40, 20, 60, 40, 80, 10]
+
+		/*
+		 * #################################.sorted()#################################
+		 */
+		/**
+		 * sorts the stream based on the natural order.
+		 * 
+		 * sorted() is a stateful intermediate operation as it needs to have all the
+		 * elements in order to sort them.
+		 * 
+		 * Stream<T> sorted()
+		 * 
+		 * Above uses the Comparable.compareTo(<T>) on the elements to compare. Thus, if
+		 * the elements of this stream are not {@code Comparable}, a
+		 * {@code java.lang.ClassCastException} may be thrown when the terminal
+		 * operation is executed.
+		 * 
+		 * Stream<T> sorted(Comparator<? super T> comparator)
+		 * 
+		 * Comparator can be passed, make sure that the <type> of 'comparing variable'
+		 * is Comparable and has proper implementation of .compareTo() <br>
+		 * i.e. <String> in Person example down below, if we were to compare by <DOB>
+		 * the DOB class would have been expected to be a Comparable with a proper
+		 * .compareTo() implemented.
+		 * 
+		 */
+//		Sorting 'List<Integer>' based on Natural sorting order by value(in asc. order)
+		List<Integer> randomIntList_sorted = randomIntList.stream().sorted().collect(Collectors.toList());
+		System.out.println(randomIntList_sorted); // [10, 10, 20, 20, 40, 40, 60, 80, 80]
+
+//		Sorting 'List<String>' in desc. order by length
+		List<String> sweetList_sortedReverseByLength = sweetList.stream()
+				.sorted((num1, num2) -> (num1.length() < num2.length()) ? 1 : (num1.length() == num2.length()) ? 0 : -1)
+				.collect(Collectors.toList());
+		System.out.println(sweetList_sortedReverseByLength); // [timbale, pastry, tarts, wafer, cake, pies]
+
+//		Sorting 'List<Integer>' in reverse of Natural sorting order by value
+		List<Integer> randoList_sortedReverse = randomIntList.stream().sorted(Comparator.reverseOrder())
+				.collect(Collectors.toList());
+		System.out.println(randoList_sortedReverse); // [80, 80, 60, 40, 40, 20, 20, 10, 10]
+
+//		Sorting 'List<Person>' using
+//		Collectors.comparing(Function<? super T, ? extends U> keyExtractor) 
+//		passed to the Stream.sorted(), we pass the lambda to get the sorting parameter
+		List<Person> people = Stream
+				.of(new Person("Molly", 46), new Person("Harry", 18), new Person("Patrisha", 24),
+						new Person("Albus", 59), new Person("Brian", 18))
+				.sorted(Comparator.comparing(Person::getName)).collect(Collectors.toList());
+		System.out.println(people);
+
+//		Sorting the names based on lexicographical order, but also limiting them to 2 count.
+//		The filtering happens first because next is sort() and sort() needs all the data to perform sorting.
+//		Then the sort is performed and first element is passed to limit, since no elements passed limit yet limit's 
+//		state is updates to '1' and allows 'Joe' to pass, then 'same happends for 'Jim' 
+//		but since the count() state is '2' now the operation is short-circuited and the pipeline is shut down. The last 3 sysouts may change the order
+//		filtered: Jim
+//		filtered: Joe
+//		filtered: Pat
+//		filtered: Ron
+//		sorted: Joe
+//		limit: Joe
+//		sorted: Jim
+//		limit: Jim
+		names.stream().parallel().filter(name -> name.length() <= 3)
+				.peek(name -> System.out.println("filtered: " + name)) // Pat, Jim, Ron, Joe
+				.sorted().peek(name -> System.out.println("sorted: " + name)) // Jim, Joe
+				.limit(2).forEach(name -> System.out.println("limit: " + name)); // Jim, Joe
 
 	}
 
