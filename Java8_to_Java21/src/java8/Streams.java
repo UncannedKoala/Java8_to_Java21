@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IntSummaryStatistics;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,9 +20,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+
+import javax.sound.midi.Instrument;
 
 import java8.utility.Person;
 
@@ -111,7 +115,8 @@ public class Streams {
 //		 terminalOperations();
 //		 collect_TerminalOperation();
 
-		intermediateOperators();
+//		intermediateOperators();
+		primitiveStream();
 
 //		 snippets();
 	}
@@ -824,6 +829,71 @@ public class Streams {
 				.sorted().peek(name -> System.out.println("sorted: " + name)) // Jim, Joe
 				.limit(2).forEach(name -> System.out.println("limit: " + name)); // Jim, Joe
 
+	}
+
+	/**
+	 * These are special streams intended to be used for primitive types: IntStream,
+	 * LongStream, DoubleStream
+	 * 
+	 * IntStream != Stream<Integer>
+	 * 
+	 * LongStream != Stream<Long>
+	 * 
+	 * DoubleStream != Stream<Double>
+	 * 
+	 * All 3 of these Interfaces have .sum(), .min(), .max(), .average(), .boxed()
+	 * abstract methods
+	 * 
+	 * .sum(), .min(), .max(), .average() are all terminal operations
+	 */
+	public static void primitiveStream() {
+		int[] intArr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+		long[] longArr = { 0l, 1l, 2l, 3l, 4l, 5l, 6l, 7l, 8l, 9l, 10l };
+		double[] doubleArr = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.1 };
+
+		IntStream intStream = IntStream.of(intArr);
+		LongStream longStream = LongStream.of(longArr);
+		DoubleStream doubleStream = DoubleStream.of(doubleArr);
+
+		/* .sum() */
+		log(IntStream.of(intArr).sum()); // IntStream has some 'int' specific methods
+
+		/* .average() */
+		log(LongStream.of(longArr).average().getAsDouble()); // LongStream has some 'long' specific methods
+
+		/* .min() */
+		log(DoubleStream.of(doubleArr).min().getAsDouble()); // DoubleStream has some 'double' specific methods
+
+		/* .max() */
+		log(DoubleStream.of(doubleArr).max().getAsDouble()); // DoubleStream has some 'double' specific methods
+
+		/* .boxed() */
+		log(IntStream.of(intArr).boxed().count()); // Converts the DoubleStream -> Stream<Double>
+
+		System.out.println("intStream size: " + intStream.count() + ", longStream size: " + longStream.count()
+				+ ", doubleStream size:" + doubleStream.count());
+
+		log(IntStream.of(intArr).sum());
+		log(IntStream.of(intArr).max().getAsInt()); // returns OptionalInt
+		log(IntStream.of(intArr).min().getAsInt()); // OptionalInt allows us to use .getAsInt()
+		log(Stream.of(2, 3, 45, 56, 2).mapToInt(n -> n).findFirst().getAsInt()); // converts Stream<Integer> to
+																					// IntStream
+
+		IntSummaryStatistics intSumarryStats = IntStream.of(intArr).summaryStatistics();
+		log("sum: " + intSumarryStats.getSum()); // default value: 0
+		log("min: " + intSumarryStats.getMin()); // default value: Integer.MIN_VALUE
+		log("max: " + intSumarryStats.getMax()); // default value: Integer.MAX_VALUE
+		log("count: " + intSumarryStats.getCount()); // (getCount>0)?(double) getSum() / getCount() : 0.0d
+		log("average: " + intSumarryStats.getAverage());
+
+		/* void java.util.IntSummaryStatistics.accept(int value) */
+//		Records a new value into the summary information and also updates the count, min, max, and sum.
+		intSumarryStats.accept(-10);
+		log("sum: " + intSumarryStats.getSum());
+		log("min: " + intSumarryStats.getMin());
+		log("max: " + intSumarryStats.getMax());
+		log("count: " + intSumarryStats.getCount());
+		log("average: " + intSumarryStats.getAverage());
 	}
 
 	/**
