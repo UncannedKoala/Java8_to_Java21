@@ -16,16 +16,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.BinaryOperator;
-import java.util.function.Function;
+import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleBiFunction;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToLongBiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
-
-import javax.sound.midi.Instrument;
 
 import java8.utility.Person;
 
@@ -105,20 +106,25 @@ import java8.utility.Person;
  * </ul>
  */
 public class Streams {
+
 	public static void main(String[] args) {
 //		streamCreation();
+
 //		streamOperation();
 //		mapToStream();
 //		readFilesUsingStreams();
+
 //		infiniteStreams();
 
 //		 terminalOperations();
 //		 collect_TerminalOperation();
 
 //		intermediateOperators();
-		primitiveStream();
 
-//		 snippets();
+//		primitiveStream();
+		primitiveCentricFunctionalInterfaces();
+
+//		snippets();
 	}
 
 	/*
@@ -894,6 +900,164 @@ public class Streams {
 		log("max: " + intSumarryStats.getMax());
 		log("count: " + intSumarryStats.getCount());
 		log("average: " + intSumarryStats.getAverage());
+	}
+
+	public static void primitiveCentricFunctionalInterfaces() {
+		IntStream intStream = IntStream.of(-23, 4, 44, 63, 43, 453, 54, 46, 646, 34, -23, 3, 21, -42, 33, 24, -42, -34);
+		LongStream longStream = LongStream.of(34l, 45l, 67l, 78l, 7l, 5l, 2l, 45l, 56l, 3l, 2l, 53l, 6l, 63l, 56l);
+		DoubleStream doubleStream = DoubleStream.of(23.0, 34.0, 65.0, -57.0, 23.0, -57.0, 6.0, -654654.0, 1235.0,
+				51632.0);
+
+		/* IntPredicate */
+//		IntPredicate isEvenPredicate = num -> num % 2 == 0;
+//		intStream.filter(isEvenPredicate).forEach(Streams::log);
+
+		/* LongPredicate */
+//		LongPredicate isOddPredicate = num -> num%2!=0;
+//		longStream.filter(isOddPredicate).forEach(Streams::log);
+
+		/* DoublePredicate */
+//		DoublePredicate negativeEvenPredicate = num -> num > 0 && num % 2 != 0;
+//		doubleStream.filter(negativeEvenPredicate).forEach(Streams::log);
+
+		/* IntConsumer */
+//		IntConsumer printIntConsumer = num -> System.out.println(num);
+//		intStream.forEach(printIntConsumer);
+
+		/* LongConsumer */
+//		LongConsumer printLongConsumer = num -> System.out.println(num);
+//		longStream.forEach(printLongConsumer);
+
+		/* DoubleConsumer */
+//		DoubleConsumer printDoubleConsumer = num -> System.out.println(num);
+//		doubleStream.forEach(printDoubleConsumer);
+
+		/* IntSupplier */
+//		IntSupplier intSupplier = () -> (int)(Math.random()*100);
+//		IntStream intStream2 = IntStream.generate(intSupplier);
+//		intStream2.limit(20).forEach(Streams::log);
+
+		/* LongSupplier */
+//		LongSupplier longSupplier = () -> (long)(Math.random()*1000);
+//		LongStream longStream2 = LongStream.generate(longSupplier);
+//		longStream2.limit(4).forEach(Streams::log);
+
+//		DoubleSupplier
+//		DoubleSupplier doubleSupplier = Math::random;
+//		DoubleStream doubleStream2 = DoubleStream.generate(doubleSupplier);
+//		doubleStream2.limit(2).forEach(Streams::log);
+
+		/* IntFunction<AtomicInteger> */
+//		converting 'int' to 'AtomicInteger'
+//		IntFunction<AtomicInteger> asAtomicInteger = num -> new AtomicInteger(num);
+//		Stream<AtomicInteger> atomicIntStream = intStream.mapToObj(asAtomicInteger);
+//		atomicIntStream.limit(2).forEach(num -> Streams.log("'" + num.getClass().getName() + "' with Value " + num));
+
+		/* LongFunction<AtomicLong> */
+//		converting 'long' primitive stream to Stream<AtomicLong>
+//		LongFunction<AtomicLong> asAtomicLog = num -> new AtomicLong(num);
+//		Stream<AtomicLong> atomicLongStream = longStream.mapToObj(asAtomicLog);
+//		atomicLongStream.limit(3).forEach(num -> Streams.log("'"+num.getClass().getName() + "' with Value " + num));
+
+		/* DoubleFunction<Long> */
+//		converting 'double' primitive stream to Stream<Long>
+//		DoubleFunction<Long> asLong = doubleVal -> Long.valueOf((long)doubleVal);
+//		Stream<Long> doubleToLongStream = doubleStream.mapToObj(asLong);
+//		doubleToLongStream.limit(5).forEach(num -> Streams.log("'"+num.getClass().getName() + "' with Value " + num));
+
+		/* IntUnaryOperator */
+//		changes the value to the nearest multiple of 10
+//		IntUnaryOperator convertIntToNearest10 = num -> (num % 10 >= 5) ? num + 10 - (num % 10) : num - (num % 10);
+//		intStream.map(convertIntToNearest10).forEach(System.out::print);
+		/* OR */
+//		IntUnaryOperator ins = num -> (int)Math.round(num*0.1)*10;
+//		intStream.map(ins).forEach(System.out::print);
+
+		/* LongUnaryOperator */
+//		change the value to nearest value ending with 5
+//		LongUnaryOperator convertLongToEndWith5 = num -> (num % 10 <= 5)? num+(5-(num%10)) : num-((num%10) -5);
+//		longStream.map(convertLongToEndWith5).forEach(Streams::log);
+
+		/* DoubleUnaryOperator */
+//		round off to nearest multiple of 10
+//		DoubleUnaryOperator roundOffDoubleToNearestTens = num -> Math.round(num/10)*10;
+//		doubleStream.map(roundOffDoubleToNearestTens).forEach(Streams::log);
+
+		/* IntBinaryOperator */
+//		creating the HashMap<Integer, Integer> having the key as number and value as reminder of 'number/2'
+//		IntBinaryOperator getRemainder = (num1, num2) -> num1 % num2;
+//		Map<Integer, Integer> hashMap = intStream.mapToObj(num->Map.entry(num, getRemainder.applyAsInt(num, 2))).collect(Collectors.toMap(entry->entry.getKey(), entry->entry.getValue(), (a,b)->a, TreeMap::new));
+//		System.out.println(hashMap);
+
+		/* LongBinaryOperator */
+//		converting all long values in stream to equivalent negative value
+//		LongBinaryOperator longSum = (l1, l2) -> l1 + l2;
+//		longStream.map(num->longSum.applyAsLong(num, num*-2)).forEach(Streams::log);
+
+		/* DoubleBinaryOperator */
+//		round off the operands and return their sum
+//		DoubleBinaryOperator roundAndAdd = (a, b) -> Math.round(a)+Math.round(b);
+//		DoubleStream.of(12.0, 19.9, 54.5, 7.2).map((a)->roundAndAdd.applyAsDouble(a, 1.1d)).forEach(Streams::log);
+
+		/* IntToDoubleFunction int -> double */
+//		IntToDoubleFunction increaseBy5point5 = a -> a+5.5;
+//		intStream.mapToDouble(increaseBy5point5).forEach(Streams::log);
+
+		/* IntToLongFunction int -> long */
+//		IntToLongFunction squareOf = a -> (long)a*a;
+//		intStream.mapToLong(squareOf).forEach(Streams::log);
+
+		/* LongToIntFunction long -> int */
+//		LongToIntFunction toIntExact = Math::toIntExact;
+//		longStream.mapToInt(toIntExact).forEach(Streams::log);
+
+		/* LongToDoubleFunction long -> double */
+//		LongToDoubleFunction cubeRoot = Math::cbrt;
+//		longStream.mapToDouble(cubeRoot).forEach(Streams::log);
+
+		/* double -> int */
+//		DoubleToIntFunction
+//		DoubleToIntFunction getRemainderDouble = (d1) -> (int)d1%2;
+//		doubleStream.mapToInt(getRemainderDouble).forEach(Streams::log);
+
+		/* DoubleToLongFunction double -> long */
+//		DoubleToLongFunction doubleToLong = d -> (long) d;
+//		doubleStream.mapToLong(doubleToLong).forEach(Streams::log);
+
+		/* ToIntFunction<T> (T) -> int */
+//		ToIntFunction<String> stringLength = String::length;
+//		Stream.of("if", "bee", "mule", "whale", "hornet", "peacock", "flamingo").mapToInt(stringLength)
+//				.forEach(Streams::log);
+
+		/* ToIntBiFunction<T, U> (T, U) -> int */
+//		ToIntBiFunction<String, String> delimiterLength = (str, delimiter) -> str.split(delimiter).length;
+//		String delimiter = " ";
+//		Stream.of("Remember that stream operations use internal iteration when processing",
+//				"elements of a stream. Also, when you execute a stream in parallel, the Java",
+//				"compiler and runtime determine the order of execution to maximize the",
+//				"benefits of parallel computing unless specified by the stream operation.")
+//				.forEach(str -> Streams.log(delimiterLength.applyAsInt(str, delimiter))); // 9, 14, 11, 10
+
+		/* ToLongFunction<T> */
+//		ToLongFunction<Integer> squareIt = num -> num * num;
+//		intStream.boxed().mapToLong(squareIt).forEach(Streams::log);
+
+		/* ToLongBiFunction<T, U> */
+//		ToLongBiFunction<Long, Long> incrementBy1andProduct = (num1, num2) -> num1*num2;
+//		longStream.forEach(val -> Streams.log(incrementBy1andProduct.applyAsLong(val, val+1)));
+		
+		/* ToDoubleFunction<T> */
+//		ToDoubleFunction<Integer> squareOfInt = val -> val*val;
+//		intStream.boxed().mapToDouble(squareOfInt).forEach(Streams::log);
+		
+		/* ToDoubleBiFunction<T, U> */
+//		ToDoubleBiFunction<Double, Integer> multiplyWith = (doubleVal, intVal) -> doubleVal*intVal;
+//		doubleStream.forEach(doubleVal -> Streams.log(multiplyWith.applyAsDouble(doubleVal, 10)));
+		
+//		mapToObject
+//		Stream<U> mapToObj(IntFunction<? extends U> mapper)
+//		Stream<U> mapToObj(LongFunction<? extends U> mapper)
+//		Stream<U> mapToObj(DoubleFunction<? extends U> mapper)
 	}
 
 	/**
