@@ -1,4 +1,4 @@
-package java8;
+package java8to15;
 
 @FunctionalInterface
 public interface FunctionConsumer {

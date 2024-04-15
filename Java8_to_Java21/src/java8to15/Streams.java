@@ -1,5 +1,6 @@
-package java8;
+package java8to15;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,13 +16,41 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleFunction;
+import java.util.function.DoublePredicate;
+import java.util.function.DoubleSupplier;
+import java.util.function.DoubleToIntFunction;
+import java.util.function.DoubleToLongFunction;
+import java.util.function.DoubleUnaryOperator;
+import java.util.function.IntBinaryOperator;
+import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
+import java.util.function.IntPredicate;
+import java.util.function.IntSupplier;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.IntToLongFunction;
+import java.util.function.IntUnaryOperator;
+import java.util.function.LongBinaryOperator;
+import java.util.function.LongConsumer;
 import java.util.function.LongFunction;
+import java.util.function.LongPredicate;
+import java.util.function.LongSupplier;
+import java.util.function.LongToDoubleFunction;
+import java.util.function.LongToIntFunction;
+import java.util.function.LongUnaryOperator;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntBiFunction;
+import java.util.function.ToIntFunction;
 import java.util.function.ToLongBiFunction;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -102,35 +131,38 @@ import java8.utility.Person;
  * <br>
  * <b>NOTE : A Stream can only be used once. After a terminal operation is
  * performed on a stream,</br>
- * it can not be used again</b>
+ * it can not be used again</b><br>
+ * <hr>
+ * <b>JAVA 9</b>
+ * <li>Stream.nullable()</li>
  * </ul>
  */
 public class Streams {
 
 	public static void main(String[] args) {
-//		streamCreation();
+		streamCreation();
 
-//		streamOperation();
-//		mapToStream();
-//		readFilesUsingStreams();
+		streamOperation();
+		mapToStream();
+		readFilesUsingStreams();
 
 //		infiniteStreams();
+		terminalOperations();
+		collect_TerminalOperation();
 
-//		 terminalOperations();
-//		 collect_TerminalOperation();
+		intermediateOperators();
 
-//		intermediateOperators();
-
-//		primitiveStream();
+		primitiveStream();
 		primitiveCentricFunctionalInterfaces();
 
-//		snippets();
+		snippets();
 	}
 
 	/*
 	 * final variables can not be reassigned but assigned object can be modified
 	 */
 	public static void streamCreation() {
+//		java 8
 		/* Using Collection.stream() */
 		List<String> list = new LinkedList<>();
 		list.add("ten");
@@ -138,7 +170,7 @@ public class Streams {
 		list.add("thirty");
 		list.add("fourty");
 		Stream<String> stream1 = list.stream();
-		stream1.filter(str -> str.length() < 5).forEach(Streams::log);
+		stream1.filter(str -> str.length() < 5).forEach(Streams::log); // ten
 
 		Set<Integer> set = new HashSet<>();
 		set.add(5);
@@ -146,43 +178,60 @@ public class Streams {
 		set.add(30);
 		set.add(45);
 		Stream<Integer> stream2 = set.stream();
-		stream2.filter(num -> num % 3 == 0 && num % 5 == 0).forEach(Streams::log);
+		stream2.filter(num -> num % 3 == 0 && num % 5 == 0).forEach(Streams::log); // 45 30
 
+//		java 8
 		/* Using Arrays.stream() */
 		int[] arr = { 2, 3, 4, 43, 65, 42, 243, 398 };
 		IntStream evenIntStream = Arrays.stream(arr);
-		evenIntStream.filter(num -> num % 2 == 0).forEach(Streams::log);
+		evenIntStream.filter(num -> num % 2 == 0).forEach(Streams::log); // 2, 4, 42, 398
 
 		long[] arr1 = { 2, 3, 4, 43, 65, 42, 243, 398 };
 		LongStream oddIntStream = Arrays.stream(arr1, 2, 7); // int[], inclusiveStart, exclusiveEnd
-		oddIntStream.filter(num -> num % 2 != 0).forEach(Streams::log);
+		oddIntStream.filter(num -> num % 2 != 0).forEach(Streams::log); // 43, 65, 243
 
+//		java 8
 		/* Using Stream.of() */
 		Stream.empty(); // empty stream
 		Stream.of("Hello"); // single element stream
 		Stream.of(2, 4, 7, 43, 2, 2, 3, 4, 6, 89); // var-args of type <T>
 
+//		java 8
 		/* Using Stream.generate(Supplier<T>) */
 		Stream<Integer> intStream = Stream.generate(() -> {
 			return (int) (Math.random() * 10);
 		});
 		intStream.limit(12).forEach(randomNum -> System.out.println("random num() :" + randomNum));
 
+//		java 8
 		/* Using Stream.iterate(T Seed, UnaryOperator<T>) */
 		Stream<Integer> intStream1 = Stream.iterate(2, num -> {
 			return num + 2;
 		});
 
-		intStream1.limit(30).forEach(input -> System.out.println("intStream() : " + input));
+		intStream1.limit(30).forEach(input -> System.out.println("intStream() : " + input)); // 2 to 60
 
+//		java 8
 		/* Creating int stream from 'm' to 'n' */
 		IntStream intStream2 = IntStream.range(1, 5); // inclusive,exclusive
 		System.out.println("***intStream2***");
 		intStream2.forEach(Streams::log); // 1 2 3 4
 
+//		java 8
+		/* static IntStream rangeClosed(int startInclusive, int endInclusive) */
 		IntStream intStream3 = IntStream.rangeClosed(7, 10); // inclusive,inclusive
 		System.out.println("***intStream3***");
 		intStream3.forEach(Streams::log); // 7 8 9 10
+
+//		java 9
+		/*
+		 * Returns a Stream containing a single passed element, else if null is passed
+		 * returns an empty Stream.
+		 */
+		Stream<String> nullable1 = Stream.ofNullable("nullable sample value");
+		Stream<String> nullable2 = Stream.ofNullable(null);
+		nullable1.forEach(Streams::log);
+		nullable2.forEach(Streams::log);
 
 	}
 
@@ -210,13 +259,47 @@ public class Streams {
 			System.out.println(" > 5 filter: " + num);
 			return num > 5;
 		}).forEach(Streams::log);
+//		even filter: 3
+//		even filter: 458
+//		 > 5 filter: 458
+//		458
+//		even filter: 423
+//		even filter: 334
+//		 > 5 filter: 334
+//		334
+//		even filter: 423
+//		even filter: 2
+//		 > 5 filter: 2
+//		even filter: 3
+//		even filter: 6
+//		 > 5 filter: 6
+//		6
+//		even filter: 6
+//		 > 5 filter: 6
+//		6
+//		even filter: 0
+//		 > 5 filter: 0
 
-		/* peek() to perform non-interfering operations */
+//		java 8
+		/*
+		 * peek() to perform non-interfering operations, limit() is a short-circuiting
+		 * stateful intermediate operation.
+		 */
 		Stream.of("Nick", "Pia", "Roy", "Zain", "Paulo", "Robbie").peek(System.out::println)
 				.filter(s -> s.startsWith("P") || s.startsWith("R"))
 				.peek(s -> System.out.println("passed starts check: " + s)).filter(s -> s.length() > 3)
 				.peek(s -> System.out.println("passed length check: " + s)).limit(1)
 				.forEach(s -> System.out.println("Answer :" + s));
+//		Nick
+//		Pia
+//		passed starts check: Pia
+//		Roy
+//		passed starts check: Roy
+//		Zain
+//		Paulo
+//		passed starts check: Paulo
+//		passed length check: Paulo
+//		Answer :Paulo
 	}
 
 	public static void mapToStream() {
@@ -231,14 +314,16 @@ public class Streams {
 				.filter(entry -> (entry.getValue() < 30 && entry.getValue() > 20))
 				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 
-		System.out.println(youngstersMap);
+		System.out.println(youngstersMap); // {Rena=21, Laur=29}
 	}
 
 	public static void readFilesUsingStreams() {
-		String path = "C:\\Users\\piyus\\OneDrive\\Desktop\\apple interview prep.txt";
+		String filePath = "C:\\Users\\piyus\\OneDrive\\Desktop\\apple interview prep.txt";
 		List<String> lines = new LinkedList<>();
 		try {
-			Files.lines(Path.of(path)).forEach(lines::add);
+//			Files.lines(Path.of(path)).forEach(lines::add);    // Path.of(String s) java 11
+			Path path = new File(filePath).toPath();
+			Files.lines(path).forEach(lines::add);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -249,16 +334,19 @@ public class Streams {
 
 	/*
 	 * limit() is a stateful intermediate operation that maintains some state to
-	 * count the current result size
+	 * count the current result size and can be used to limit the streams
 	 */
 	public static void infiniteStreams() {
 
+//		java 8
 		/* static Stream<T> generate(Supplier<? extends T>) */
 		Stream<Integer> intStream = Stream.generate(() -> {
 			return (int) (Math.random() * 10);
 		});
 		intStream.forEach(System.out::println); // keeps going one unless the supply is cut off
 
+//		java 8
+		/* Stream<T> iterate(final T seed, final UnaryOperator<T> f) */
 		Stream<Integer> intStream1 = Stream.iterate(2, n -> n + 2);
 		intStream1.forEach(System.out::println);
 	}
@@ -324,6 +412,7 @@ public class Streams {
 		animals.add("Yak");
 		animals.add("Tiger");
 
+//		java 8
 		/* .max() */
 		System.out.println("largest: " + Arrays.stream(arr).max().getAsInt()); // 432
 		System.out.println("largest -ve: " + Arrays.stream(arr).filter(num -> num <= 0).max().getAsInt()); // -2
@@ -337,6 +426,7 @@ public class Streams {
 		else
 			System.out.println("longest animal name: NOT FOUND!!!");
 
+//		java 8
 		/* .min() */
 		System.out.println("smallest: " + Arrays.stream(arr).min().getAsInt()); // -53
 		System.out.println("smallest +ve: " + Arrays.stream(arr).filter(num -> num >= 0).min().getAsInt()); // 1
@@ -349,6 +439,7 @@ public class Streams {
 		else
 			System.out.println("sortest animal name: NOT FOUND!!!");
 
+//		java 8
 		/* .count() */
 		long allTwoDigitNumberCount = Arrays.stream(arr).filter(number -> number > 9 || number < -9).count();
 		long possitiveTwoDigitNumberCount = Arrays.stream(arr).filter(number -> number > 9).count();
@@ -357,10 +448,12 @@ public class Streams {
 		System.out.println("Number of possitive 2 digit numbers: " + possitiveTwoDigitNumberCount); // 5
 		System.out.println("Number of animals names with less than 7 alaphabets: " + smallNameAnimals);// 3
 
+//		java 8
 		/* .findAny() */
 		Optional<String> any = animals.stream().findAny();
 		any.ifPresent(System.out::println); // Lion (usually)
 
+//		java 8
 		/* .findFirst() */
 		Optional<String> first = animals.stream().filter(name -> name.length() > 4).findFirst();
 		first.ifPresent(System.out::println); // ReinDeer
@@ -370,10 +463,12 @@ public class Streams {
 		System.out.println(animals.stream().allMatch(startsWithR)); // false ('Lion', 'Yak', 'Tiger' do not)
 		System.out.println(animals.stream().noneMatch(startsWithR)); // false ('ReinDeer' starts with 'R')
 
+//		java 8
 		/* .forEach() */
 		Stream<Integer> stream = Stream.iterate(0, n -> n + 7);
-		stream.limit(100000).forEach(System.out::println);
+		stream.limit(10).forEach(System.out::println);
 
+//		java 8
 		/*
 		 * .reduce() :: T reduce(T identity, BinaryOperator<T> accumulator)
 		 * 
@@ -391,24 +486,30 @@ public class Streams {
 				(initialValue, currentValue) -> initialValue + currentValue);
 		System.out.println(finalResult);
 
+//		java 8
 		/*
 		 * .reduce() :: Optional<T> reduce(BinaryOperator<T> accumulator). Whenever used
 		 * without 'identity' the return will be an Optional<T>
 		 */
 		Stream<String> strStream1 = Stream.of("a", "b", "o", "d", "e");
 		Stream<String> strStream2 = Stream.of("a", "7", "o", "d", "e");
+		Stream<String> strStream3 = Stream.of("a", "7", "o", "d", "e", "3");
 
-		Optional<String> result1, result2 = null;
+		Optional<String> result1, result2, result3 = null;
 		Predicate<String> isDigitFilter = str -> Character.isDigit(str.charAt(0));
-		BinaryOperator<String> strAccumulator = (str1, str2) -> str1 + str2;
+		BinaryOperator<String> strAccumulator = (str1, str2) -> Integer.parseInt(str1) + Integer.parseInt(str2) + "";
 		Supplier<Optional<String>> notFoundSupplier = () -> Optional.of("not found!!!");
 
 		result1 = strStream1.filter(isDigitFilter).reduce(strAccumulator);
 		result2 = strStream2.filter(isDigitFilter).reduce(strAccumulator);
+		result3 = strStream3.filter(isDigitFilter).reduce(strAccumulator);
 
+//		Optional.or() is used here which was added in java 9
 		System.out.println(result1.or(notFoundSupplier).get()); // not found!!!
 		System.out.println(result2.or(notFoundSupplier).get()); // 7
+		System.out.println(result3.or(notFoundSupplier).get()); // 10
 
+//		java 8
 		/*
 		 * .reduce() :: <U> U reduce(U identity, BiFunction<U, ? super T, U>
 		 * accumulator, BinaryOperator<U> combiner).
@@ -467,6 +568,7 @@ public class Streams {
 	 */
 	public static void collect_TerminalOperation() {
 
+//		java 8
 		/**
 		 * for the below in single threaded situation, a single 'StringBuider' is used
 		 * and the 'accumulator' iterates over all the elements and appends them to the
@@ -490,6 +592,7 @@ public class Streams {
 				});
 		System.out.println("Using single-threaded stream: " + sBuilder1);
 
+//		java 8
 		/**
 		 * while in multi-threaded situations, there is a new 'StringBuilder' created
 		 * per elements, the 'accumulator' appends the current element to the newly
@@ -521,62 +624,93 @@ public class Streams {
 				});
 		System.out.println("Using multi-threaded streams: " + sBuilder2);
 
+//		java 8
 		/*
 		 * ############.collect() using Collectors interface static methods############
 		 */
-
 		List<String> sweetList = List.of("cake", "pastry", "pies", "tarts", "wafer", "timbale");
 		List<Integer> intList = List.of(10, 20, 30, 40, 50, 60, 70, 80, 90);
 		List<Integer> randomIntList = List.of(10, 20, 80, 40, 20, 60, 40, 80, 10);
 		List<Long> longList = List.of(100l, 200l, 300l, 400l, 500l, 600l, 700l, 800l, 900l);
 		List<Double> doubleList = List.of(10.3, 19.7, 30.2, 39.8, 50.1, 60.0, 69.9, 80.0, 90.0);
 
+		Set<Integer> randomIntSet = randomIntList.stream().collect(Collectors.toSet());
+		System.out.println(randomIntSet); // [80, 20, 40, 10, 60]
+
+//		java 8
 		/*
 		 * ##########################Collectors.joining()##########################
 		 */
 		String sweetTooth1 = sweetList.stream().collect(Collectors.joining());
 		System.out.println(sweetTooth1); // cakepastrypiestartswafertimbale
 
+//		java 8
 		/*
 		 * #####################Collectors.joining(delimiter)#####################
 		 */
 		String sweetTooth2 = sweetList.stream().collect(Collectors.joining(" -> "));
 		System.out.println(sweetTooth2); // cake -> pastry -> pies -> tarts -> wafer -> timbale
 
+//		java 8
 		/*
 		 * #############Collectors.joining(delimiter, prefix, suffix)#############
 		 */
 		String sweetTooth3 = sweetList.stream().collect(Collectors.joining(", ", ">>", "<<"));
 		System.out.println(sweetTooth3); // >>cake, pastry, pies, tarts, wafer, timbale<<
 
+//		java 8
 		/*
 		 * ###################<Double> Collectors.averagingInt()###################
 		 */
 		Double averageLength = sweetList.stream().collect(Collectors.averagingInt(name -> name.length()));
 		System.out.println("averageLength of sweetList: " + averageLength); // 5.166666666666667
 
+//		java 8
 		/*
 		 * ##################<Integer> Collectors.averagingInt()##################
 		 */
 		Double averageInt = intList.stream().collect(Collectors.averagingInt(num -> num));
 		System.out.println("averageValue of intList: " + averageInt); // 50.0
 
+//		java 8
 		/*
 		 * ####################<Long> Collectors.averagingLong()###################
 		 */
 		Double averageLong = longList.stream().collect(Collectors.averagingLong(num -> num));
 		System.out.println("averageValue of longList: " + averageLong); // 500.0
 
+//		java 8
 		/*
 		 * #################<Double> Collectors.averagingDouble()#################
 		 */
 		Double averageDouble = doubleList.stream().collect(Collectors.averagingDouble(num -> num));
 		System.out.println("averageValue of doubleList: " + averageDouble); // 50.0
 
+//		java 8
+		/*
+		 * ##################<Integer> Collectors.summingInt()##################
+		 */
+		Integer sumInt = intList.stream().collect(Collectors.summingInt(num -> num));
+		System.out.println("sum Value of intList: " + sumInt); // 450
+
+//		java 8
+		/*
+		 * ####################<Long> Collectors.summingLong()###################
+		 */
+		Long sumLong = longList.stream().collect(Collectors.summingLong(num -> num));
+		System.out.println("sum Value of longList: " + sumLong); // 4500
+
+//		java 8
+		/*
+		 * #################<Double> Collectors.summingDouble()#################
+		 */
+		Double sumDouble = doubleList.stream().collect(Collectors.summingDouble(num -> num));
+		System.out.println("sum Value of doubleList: " + sumDouble); // 450.0
+
+//		java 8
 		/*
 		 * ###########################Collectors.toMap()##########################
 		 */
-
 		/**
 		 * Collectors.toMap( <br>
 		 * Function<? super T, ? extends K> keyMapper, <br>
@@ -590,6 +724,7 @@ public class Streams {
 				.collect(Collectors.toMap(str -> str, str -> str.length()));
 		System.out.println(sweetWithLength); // {pastry=6, pies=4, wafer=5, tarts=5, cake=4, timbale=7}
 
+//		java 8
 		/**
 		 * Collectors.toMap( <br>
 		 * Function<? super T, ? extends K> keyMapper, <br>
@@ -605,6 +740,7 @@ public class Streams {
 		System.out.println(lengthWithSweet); // {4=cake and pies, 5=tarts and wafer, 6=pastry, 7=timbale}
 		System.out.println(lengthWithSweet.getClass()); // class java.util.HashMap
 
+//		java 8
 		/**
 		 * Get the specified type of resulting Map
 		 * 
@@ -622,6 +758,7 @@ public class Streams {
 		System.out.println(sweetWithTotalLength); // {tart=8, pastry=6, cake=4, ice cream=9}
 		System.out.println(sweetWithTotalLength.getClass()); // class java.util.LinkedHashMap
 
+//		java 8
 		/*
 		 * ########################Collectors.groupingBy()########################
 		 */
@@ -668,6 +805,7 @@ public class Streams {
 				.collect(Collectors.groupingBy(number -> number, TreeMap::new, Collectors.toSet()));
 		System.out.println(intGroupedByValue_asTreeSet.getClass()); // class java.util.TreeMap
 
+//		java 8
 		/*
 		 * ########################Collectors.partitionBy()########################
 		 */
@@ -689,7 +827,6 @@ public class Streams {
 				.collect(Collectors.partitioningBy(number -> number > 50, Collectors.toSet()));
 		System.out.println(integerValuesOver50_set); // {false=[20, 40, 10], true=[80, 60]} instead of
 														// {false=[10, 20, 40, 20, 40, 10], true=[80, 60, 80]}
-
 	}
 
 	/**
@@ -704,8 +841,7 @@ public class Streams {
 		List<Long> longList = List.of(100l, 200l, 300l, 400l, 500l, 600l, 700l, 800l, 900l);
 		List<Double> doubleList = List.of(10.3, 19.7, 30.2, 39.8, 50.1, 60.0, 69.9, 80.0, 90.0, 100.00);
 
-//		 * ########################Collectors.partitionBy()########################
-
+//		java 8
 		/*
 		 * #########################.filter(Predicate<T>)#########################
 		 */
@@ -719,6 +855,7 @@ public class Streams {
 				.collect(Collectors.toList());
 		System.out.println(sweetNames_moreThan4length); // [pastry, tarts, wafer, timbale]
 
+//		java 8
 		/*
 		 * ##############################.distinct()##############################
 		 */
@@ -732,6 +869,7 @@ public class Streams {
 //		Getting all the distinct values of the Stream<Integer>
 		System.out.println(randomIntList.stream().distinct().collect(Collectors.toList())); // [10, 20, 80, 40, 60];
 
+//		java 8
 		/*
 		 * ################################.limit()################################
 		 */
@@ -745,6 +883,7 @@ public class Streams {
 				.collect(Collectors.toList());
 		System.out.println("first2EvenNumbers: " + first2EvenNumbers); // first2EvenNumbers: [60.0, 80.0]
 
+//		java 8
 		/*
 		 * ##################################.map()##################################
 		 */
@@ -757,6 +896,7 @@ public class Streams {
 		List<Character> sweetIntitals = sweetList.stream().map(sweet -> sweet.charAt(0)).collect(Collectors.toList());
 		System.out.println(sweetIntitals); // [c, p, p, t, w, t]
 
+//		java 8
 		/*
 		 * ################################.flatMap()################################
 		 */
@@ -768,6 +908,7 @@ public class Streams {
 				.collect(Collectors.toList());
 		System.out.println(allIntList); // [10, 20, 30, 40, 50, 60, 70, 80, 90, 10, 20, 80, 40, 20, 60, 40, 80, 10]
 
+//		java 8
 		/*
 		 * #################################.sorted()#################################
 		 */
@@ -861,30 +1002,37 @@ public class Streams {
 		LongStream longStream = LongStream.of(longArr);
 		DoubleStream doubleStream = DoubleStream.of(doubleArr);
 
+//		java 8
 		/* .sum() */
 		log(IntStream.of(intArr).sum()); // IntStream has some 'int' specific methods
 
+//		java 8
 		/* .average() */
 		log(LongStream.of(longArr).average().getAsDouble()); // LongStream has some 'long' specific methods
 
+//		java 8
 		/* .min() */
 		log(DoubleStream.of(doubleArr).min().getAsDouble()); // DoubleStream has some 'double' specific methods
 
+//		java 8
 		/* .max() */
 		log(DoubleStream.of(doubleArr).max().getAsDouble()); // DoubleStream has some 'double' specific methods
 
+//		java 8
 		/* .boxed() */
 		log(IntStream.of(intArr).boxed().count()); // Converts the DoubleStream -> Stream<Double>
 
 		System.out.println("intStream size: " + intStream.count() + ", longStream size: " + longStream.count()
 				+ ", doubleStream size:" + doubleStream.count());
 
+//		java 8
 		log(IntStream.of(intArr).sum());
 		log(IntStream.of(intArr).max().getAsInt()); // returns OptionalInt
 		log(IntStream.of(intArr).min().getAsInt()); // OptionalInt allows us to use .getAsInt()
 		log(Stream.of(2, 3, 45, 56, 2).mapToInt(n -> n).findFirst().getAsInt()); // converts Stream<Integer> to
 																					// IntStream
 
+//		java 8
 		IntSummaryStatistics intSumarryStats = IntStream.of(intArr).summaryStatistics();
 		log("sum: " + intSumarryStats.getSum()); // default value: 0
 		log("min: " + intSumarryStats.getMin()); // default value: Integer.MIN_VALUE
@@ -892,6 +1040,7 @@ public class Streams {
 		log("count: " + intSumarryStats.getCount()); // (getCount>0)?(double) getSum() / getCount() : 0.0d
 		log("average: " + intSumarryStats.getAverage());
 
+//		java 8
 		/* void java.util.IntSummaryStatistics.accept(int value) */
 //		Records a new value into the summary information and also updates the count, min, max, and sum.
 		intSumarryStats.accept(-10);
@@ -900,160 +1049,252 @@ public class Streams {
 		log("max: " + intSumarryStats.getMax());
 		log("count: " + intSumarryStats.getCount());
 		log("average: " + intSumarryStats.getAverage());
+
+//		java 9
+		/*
+		 * ###########################IntStream.iterate()###########################
+		 */
+		/*
+		 * static IntStream iterate(int seed, IntPredicate hasNext, IntUnaryOperator
+		 * next)
+		 */
+		IntStream intStream0 = IntStream.iterate(0, (num) -> num < 300, num -> num + (int) (Math.random() * 100));
+		intStream0.forEach(System.out::println);
+
+		IntStream intStream1 = IntStream.iterate(2, n -> n + 2);
+		intStream1.limit(20).forEach(System.out::println);
+
+		int[] intArr1 = { 10, 20, 30, 403, 403, 60, 70, 70, 80, 90 };
+
+//		java 9
+		/*
+		 * ###########################IntStream.takeWhile()###########################
+		 */
+//		default IntStream takeWhile(IntPredicate predicate)
+//		Returns a Stream containing elements of input stream from starting in 
+//		sequential order till the elements of input stream keep returning true 
+//		for the predicate. As soon as the predicate returns false the elements are no longer taken.
+		int[] resultArr1 = IntStream.of(intArr1).takeWhile(num -> num % 10 == 0).toArray();
+		System.out.println(Arrays.toString(resultArr1)); // [10, 20, 30]
+
+//		java 9
+		/*
+		 * ###########################IntStream.dropWhile()###########################
+		 */
+		int[] resultArr2 = IntStream.of(intArr1).dropWhile(num -> num % 10 == 0).toArray();
+		System.out.println(Arrays.toString(resultArr2)); // [403, 403, 60, 70, 70, 80, 90]
 	}
 
 	public static void primitiveCentricFunctionalInterfaces() {
-		IntStream intStream = IntStream.of(-23, 4, 44, 63, 43, 453, 54, 46, 646, 34, -23, 3, 21, -42, 33, 24, -42, -34);
-		LongStream longStream = LongStream.of(34l, 45l, 67l, 78l, 7l, 5l, 2l, 45l, 56l, 3l, 2l, 53l, 6l, 63l, 56l);
-		DoubleStream doubleStream = DoubleStream.of(23.0, 34.0, 65.0, -57.0, 23.0, -57.0, 6.0, -654654.0, 1235.0,
-				51632.0);
+		int[] intArr = { -23, 4, 44, 63, 43, 453, 54, 46, 646, 34, -23, 3, 21, -42, 33, 24, -42, -34 };
+		long[] longArr = { 34l, 45l, 67l, 78l, 7l, 5l, 2l, 45l, 56l, 3l, 2l, 53l, 6l, 63l, 56l };
+		double[] doubleArr = { 23.0, 34.0, 65.0, -57.0, 23.0, -57.0, 6.0, -654654.0, 1235.0, 51632.0 };
 
+//		java 8
 		/* IntPredicate */
-//		IntPredicate isEvenPredicate = num -> num % 2 == 0;
-//		intStream.filter(isEvenPredicate).forEach(Streams::log);
+		IntPredicate isEvenPredicate = num -> num % 2 == 0;
+		IntStream intStream = IntStream.of(intArr);
+		intStream.filter(isEvenPredicate).forEach(Streams::log);
 
+//		java 8
 		/* LongPredicate */
-//		LongPredicate isOddPredicate = num -> num%2!=0;
-//		longStream.filter(isOddPredicate).forEach(Streams::log);
+		LongPredicate isOddPredicate = num -> num % 2 != 0;
+		LongStream longStream = LongStream.of(longArr);
+		longStream.filter(isOddPredicate).forEach(Streams::log);
 
+//		java 8
 		/* DoublePredicate */
-//		DoublePredicate negativeEvenPredicate = num -> num > 0 && num % 2 != 0;
-//		doubleStream.filter(negativeEvenPredicate).forEach(Streams::log);
+		DoublePredicate negativeEvenPredicate = num -> num > 0 && num % 2 != 0;
+		DoubleStream doubleStream = DoubleStream.of(doubleArr);
+		doubleStream.filter(negativeEvenPredicate).forEach(Streams::log);
 
+//		java 8
 		/* IntConsumer */
-//		IntConsumer printIntConsumer = num -> System.out.println(num);
-//		intStream.forEach(printIntConsumer);
+		IntConsumer printIntConsumer = num -> System.out.println(num);
+		intStream = IntStream.of(intArr);
+		intStream.forEach(printIntConsumer);
 
+//		java 8
 		/* LongConsumer */
-//		LongConsumer printLongConsumer = num -> System.out.println(num);
-//		longStream.forEach(printLongConsumer);
+		LongConsumer printLongConsumer = num -> System.out.println(num);
+		longStream = LongStream.of(longArr);
+		longStream.forEach(printLongConsumer);
 
+//		java 8
 		/* DoubleConsumer */
-//		DoubleConsumer printDoubleConsumer = num -> System.out.println(num);
-//		doubleStream.forEach(printDoubleConsumer);
+		DoubleConsumer printDoubleConsumer = num -> System.out.println(num);
+		doubleStream = DoubleStream.of(doubleArr);
+		doubleStream.forEach(printDoubleConsumer);
 
+//		java 8
 		/* IntSupplier */
-//		IntSupplier intSupplier = () -> (int)(Math.random()*100);
-//		IntStream intStream2 = IntStream.generate(intSupplier);
-//		intStream2.limit(20).forEach(Streams::log);
+		IntSupplier intSupplier = () -> (int) (Math.random() * 100);
+		IntStream intStream2 = IntStream.generate(intSupplier);
+		intStream2.limit(20).forEach(Streams::log);
 
+//		java 8
 		/* LongSupplier */
-//		LongSupplier longSupplier = () -> (long)(Math.random()*1000);
-//		LongStream longStream2 = LongStream.generate(longSupplier);
-//		longStream2.limit(4).forEach(Streams::log);
+		LongSupplier longSupplier = () -> (long) (Math.random() * 1000);
+		LongStream longStream2 = LongStream.generate(longSupplier);
+		longStream2.limit(4).forEach(Streams::log);
 
-//		DoubleSupplier
-//		DoubleSupplier doubleSupplier = Math::random;
-//		DoubleStream doubleStream2 = DoubleStream.generate(doubleSupplier);
-//		doubleStream2.limit(2).forEach(Streams::log);
+//		java 8
+		/* DoubleSupplier */
+		DoubleSupplier doubleSupplier = Math::random;
+		DoubleStream doubleStream2 = DoubleStream.generate(doubleSupplier);
+		doubleStream2.limit(2).forEach(Streams::log);
 
+//		java 8
 		/* IntFunction<AtomicInteger> */
 //		converting 'int' to 'AtomicInteger'
-//		IntFunction<AtomicInteger> asAtomicInteger = num -> new AtomicInteger(num);
-//		Stream<AtomicInteger> atomicIntStream = intStream.mapToObj(asAtomicInteger);
-//		atomicIntStream.limit(2).forEach(num -> Streams.log("'" + num.getClass().getName() + "' with Value " + num));
+		IntFunction<AtomicInteger> asAtomicInteger = num -> new AtomicInteger(num);
+		intStream = IntStream.of(intArr);
+		Stream<AtomicInteger> atomicIntStream = intStream.mapToObj(asAtomicInteger);
+		atomicIntStream.limit(2).forEach(num -> Streams.log("'" + num.getClass().getName() + "' with Value " + num));
 
+//		java 8
 		/* LongFunction<AtomicLong> */
 //		converting 'long' primitive stream to Stream<AtomicLong>
-//		LongFunction<AtomicLong> asAtomicLog = num -> new AtomicLong(num);
-//		Stream<AtomicLong> atomicLongStream = longStream.mapToObj(asAtomicLog);
-//		atomicLongStream.limit(3).forEach(num -> Streams.log("'"+num.getClass().getName() + "' with Value " + num));
+		LongFunction<AtomicLong> asAtomicLog = num -> new AtomicLong(num);
+		longStream = LongStream.of(longArr);
+		Stream<AtomicLong> atomicLongStream = longStream.mapToObj(asAtomicLog);
+		atomicLongStream.limit(3).forEach(num -> Streams.log("'" + num.getClass().getName() + "' with Value " + num));
 
+//		java 8
 		/* DoubleFunction<Long> */
 //		converting 'double' primitive stream to Stream<Long>
-//		DoubleFunction<Long> asLong = doubleVal -> Long.valueOf((long)doubleVal);
-//		Stream<Long> doubleToLongStream = doubleStream.mapToObj(asLong);
-//		doubleToLongStream.limit(5).forEach(num -> Streams.log("'"+num.getClass().getName() + "' with Value " + num));
+		DoubleFunction<Long> asLong = doubleVal -> Long.valueOf((long) doubleVal);
+		doubleStream = DoubleStream.of(doubleArr);
+		Stream<Long> doubleToLongStream = doubleStream.mapToObj(asLong);
+		doubleToLongStream.limit(5).forEach(num -> Streams.log("'" + num.getClass().getName() + "' with Value " + num));
 
+//		java 8
 		/* IntUnaryOperator */
 //		changes the value to the nearest multiple of 10
-//		IntUnaryOperator convertIntToNearest10 = num -> (num % 10 >= 5) ? num + 10 - (num % 10) : num - (num % 10);
-//		intStream.map(convertIntToNearest10).forEach(System.out::print);
+		IntUnaryOperator convertIntToNearest10 = num -> (num % 10 >= 5) ? num + 10 - (num % 10) : num - (num % 10);
+		intStream = IntStream.of(intArr);
+		intStream.map(convertIntToNearest10).forEach(System.out::print);
 		/* OR */
-//		IntUnaryOperator ins = num -> (int)Math.round(num*0.1)*10;
-//		intStream.map(ins).forEach(System.out::print);
+		IntUnaryOperator ins = num -> (int) Math.round(num * 0.1) * 10;
+		intStream = IntStream.of(intArr);
+		intStream.map(ins).forEach(System.out::print);
 
+//		java 8
 		/* LongUnaryOperator */
 //		change the value to nearest value ending with 5
-//		LongUnaryOperator convertLongToEndWith5 = num -> (num % 10 <= 5)? num+(5-(num%10)) : num-((num%10) -5);
-//		longStream.map(convertLongToEndWith5).forEach(Streams::log);
+		LongUnaryOperator convertLongToEndWith5 = num -> (num % 10 <= 5) ? num + (5 - (num % 10))
+				: num - ((num % 10) - 5);
+		longStream = LongStream.of(longArr);
+		longStream.map(convertLongToEndWith5).forEach(Streams::log);
 
+//		java 8
 		/* DoubleUnaryOperator */
 //		round off to nearest multiple of 10
-//		DoubleUnaryOperator roundOffDoubleToNearestTens = num -> Math.round(num/10)*10;
-//		doubleStream.map(roundOffDoubleToNearestTens).forEach(Streams::log);
+		DoubleUnaryOperator roundOffDoubleToNearestTens = num -> Math.round(num / 10) * 10;
+		doubleStream = DoubleStream.of(doubleArr);
+		doubleStream.map(roundOffDoubleToNearestTens).forEach(Streams::log);
 
+//		java 8
 		/* IntBinaryOperator */
 //		creating the HashMap<Integer, Integer> having the key as number and value as reminder of 'number/2'
-//		IntBinaryOperator getRemainder = (num1, num2) -> num1 % num2;
-//		Map<Integer, Integer> hashMap = intStream.mapToObj(num->Map.entry(num, getRemainder.applyAsInt(num, 2))).collect(Collectors.toMap(entry->entry.getKey(), entry->entry.getValue(), (a,b)->a, TreeMap::new));
-//		System.out.println(hashMap);
+		IntBinaryOperator getRemainder = (num1, num2) -> num1 % num2;
+		intStream = IntStream.of(intArr);
+		Map<Integer, Integer> hashMap = intStream.mapToObj(num -> Map.entry(num, getRemainder.applyAsInt(num, 2)))
+				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue(), (a, b) -> a,
+						TreeMap::new));
+		System.out.println(hashMap);
 
+//		java 8
 		/* LongBinaryOperator */
 //		converting all long values in stream to equivalent negative value
-//		LongBinaryOperator longSum = (l1, l2) -> l1 + l2;
-//		longStream.map(num->longSum.applyAsLong(num, num*-2)).forEach(Streams::log);
+		LongBinaryOperator longSum = (l1, l2) -> l1 + l2;
+		longStream = LongStream.of(longArr);
+		longStream.map(num -> longSum.applyAsLong(num, num * -2)).forEach(Streams::log);
 
+//		java 8
 		/* DoubleBinaryOperator */
 //		round off the operands and return their sum
-//		DoubleBinaryOperator roundAndAdd = (a, b) -> Math.round(a)+Math.round(b);
-//		DoubleStream.of(12.0, 19.9, 54.5, 7.2).map((a)->roundAndAdd.applyAsDouble(a, 1.1d)).forEach(Streams::log);
+		DoubleBinaryOperator roundAndAdd = (a, b) -> Math.round(a) + Math.round(b);
+		DoubleStream.of(12.0, 19.9, 54.5, 7.2).map((a) -> roundAndAdd.applyAsDouble(a, 1.1d)).forEach(Streams::log);
 
+//		java 8
 		/* IntToDoubleFunction int -> double */
-//		IntToDoubleFunction increaseBy5point5 = a -> a+5.5;
-//		intStream.mapToDouble(increaseBy5point5).forEach(Streams::log);
+		IntToDoubleFunction increaseBy5point5 = a -> a + 5.5;
+		intStream = IntStream.of(intArr);
+		intStream.mapToDouble(increaseBy5point5).forEach(Streams::log);
 
+//		java 8
 		/* IntToLongFunction int -> long */
-//		IntToLongFunction squareOf = a -> (long)a*a;
-//		intStream.mapToLong(squareOf).forEach(Streams::log);
+		IntToLongFunction squareOf = a -> (long) a * a;
+		intStream = IntStream.of(intArr);
+		intStream.mapToLong(squareOf).forEach(Streams::log);
 
+//		java 8
 		/* LongToIntFunction long -> int */
-//		LongToIntFunction toIntExact = Math::toIntExact;
-//		longStream.mapToInt(toIntExact).forEach(Streams::log);
+		LongToIntFunction toIntExact = Math::toIntExact;
+		longStream = LongStream.of(longArr);
+		longStream.mapToInt(toIntExact).forEach(Streams::log);
 
+//		java 8
 		/* LongToDoubleFunction long -> double */
-//		LongToDoubleFunction cubeRoot = Math::cbrt;
-//		longStream.mapToDouble(cubeRoot).forEach(Streams::log);
+		LongToDoubleFunction cubeRoot = Math::cbrt;
+		longStream = LongStream.of(longArr);
+		longStream.mapToDouble(cubeRoot).forEach(Streams::log);
 
+//		java 8
 		/* double -> int */
 //		DoubleToIntFunction
-//		DoubleToIntFunction getRemainderDouble = (d1) -> (int)d1%2;
-//		doubleStream.mapToInt(getRemainderDouble).forEach(Streams::log);
+		DoubleToIntFunction getRemainderDouble = (d1) -> (int) d1 % 2;
+		doubleStream = DoubleStream.of(doubleArr);
+		doubleStream.mapToInt(getRemainderDouble).forEach(Streams::log);
 
+//		java 8
 		/* DoubleToLongFunction double -> long */
-//		DoubleToLongFunction doubleToLong = d -> (long) d;
-//		doubleStream.mapToLong(doubleToLong).forEach(Streams::log);
+		DoubleToLongFunction doubleToLong = d -> (long) d;
+		doubleStream = DoubleStream.of(doubleArr);
+		doubleStream.mapToLong(doubleToLong).forEach(Streams::log);
 
+//		java 8
 		/* ToIntFunction<T> (T) -> int */
-//		ToIntFunction<String> stringLength = String::length;
-//		Stream.of("if", "bee", "mule", "whale", "hornet", "peacock", "flamingo").mapToInt(stringLength)
-//				.forEach(Streams::log);
+		ToIntFunction<String> stringLength = String::length;
+		Stream.of("if", "bee", "mule", "whale", "hornet", "peacock", "flamingo").mapToInt(stringLength)
+				.forEach(Streams::log);
 
+//		java 8
 		/* ToIntBiFunction<T, U> (T, U) -> int */
-//		ToIntBiFunction<String, String> delimiterLength = (str, delimiter) -> str.split(delimiter).length;
-//		String delimiter = " ";
-//		Stream.of("Remember that stream operations use internal iteration when processing",
-//				"elements of a stream. Also, when you execute a stream in parallel, the Java",
-//				"compiler and runtime determine the order of execution to maximize the",
-//				"benefits of parallel computing unless specified by the stream operation.")
-//				.forEach(str -> Streams.log(delimiterLength.applyAsInt(str, delimiter))); // 9, 14, 11, 10
+		ToIntBiFunction<String, String> delimiterLength = (str, delimiter) -> str.split(delimiter).length;
+		String delimiter = " ";
+		Stream.of("Remember that stream operations use internal iteration when processing",
+				"elements of a stream. Also, when you execute a stream in parallel, the Java",
+				"compiler and runtime determine the order of execution to maximize the",
+				"benefits of parallel computing unless specified by the stream operation.")
+				.forEach(str -> Streams.log(delimiterLength.applyAsInt(str, delimiter))); // 9, 14, 11, 10
 
+//		java 8
 		/* ToLongFunction<T> */
-//		ToLongFunction<Integer> squareIt = num -> num * num;
-//		intStream.boxed().mapToLong(squareIt).forEach(Streams::log);
+		ToLongFunction<Integer> squareIt = num -> num * num;
+		intStream = IntStream.of(intArr);
+		intStream.boxed().mapToLong(squareIt).forEach(Streams::log);
 
+//		java 8
 		/* ToLongBiFunction<T, U> */
-//		ToLongBiFunction<Long, Long> incrementBy1andProduct = (num1, num2) -> num1*num2;
-//		longStream.forEach(val -> Streams.log(incrementBy1andProduct.applyAsLong(val, val+1)));
-		
+		ToLongBiFunction<Long, Long> incrementBy1andProduct = (num1, num2) -> num1 * num2;
+		longStream = LongStream.of(longArr);
+		longStream.forEach(val -> Streams.log(incrementBy1andProduct.applyAsLong(val, val + 1)));
+
+//		java 8
 		/* ToDoubleFunction<T> */
-//		ToDoubleFunction<Integer> squareOfInt = val -> val*val;
-//		intStream.boxed().mapToDouble(squareOfInt).forEach(Streams::log);
-		
+		ToDoubleFunction<Integer> squareOfInt = val -> val * val;
+		intStream = IntStream.of(intArr);
+		intStream.boxed().mapToDouble(squareOfInt).forEach(Streams::log);
+
+//		java 8
 		/* ToDoubleBiFunction<T, U> */
-//		ToDoubleBiFunction<Double, Integer> multiplyWith = (doubleVal, intVal) -> doubleVal*intVal;
-//		doubleStream.forEach(doubleVal -> Streams.log(multiplyWith.applyAsDouble(doubleVal, 10)));
-		
+		ToDoubleBiFunction<Double, Integer> multiplyWith = (doubleVal, intVal) -> doubleVal * intVal;
+		doubleStream = DoubleStream.of(doubleArr);
+		doubleStream.forEach(doubleVal -> Streams.log(multiplyWith.applyAsDouble(doubleVal, 10)));
+
+//		java 8
 //		mapToObject
 //		Stream<U> mapToObj(IntFunction<? extends U> mapper)
 //		Stream<U> mapToObj(LongFunction<? extends U> mapper)
@@ -1134,10 +1375,10 @@ public class Streams {
 		List<List<Integer>> lists = Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6),
 				Arrays.asList(7, 8, 9));
 		List<Integer> combined = lists.stream().reduce(new ArrayList<>(), (acc, list) -> {
-			acc.addAll(list);
+			acc.addAll(list); // adding all the elements from current list to identity list
 			return acc;
 		}, (l1, l2) -> {
-			return l1;
+			return l1; // not a parallel stream thus Combiner implementation does not matter
 		});
 		System.out.println("combined list: " + combined); // 1 2 3 4 5 6 7 8 9
 
