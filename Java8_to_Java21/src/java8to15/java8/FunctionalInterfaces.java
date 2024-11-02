@@ -1,4 +1,4 @@
-package java8to15;
+package java8to15.java8;
 
 import java.util.HashMap;
 import java.util.Map;
