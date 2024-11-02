@@ -1,4 +1,4 @@
-package java8to15;
+package java8to15.java8;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -146,7 +146,7 @@ public class Streams {
 		mapToStream();
 		readFilesUsingStreams();
 
-//		infiniteStreams();
+		infiniteStreams();
 		terminalOperations();
 		collect_TerminalOperation();
 
@@ -321,9 +321,9 @@ public class Streams {
 		String filePath = "C:\\Users\\piyus\\OneDrive\\Desktop\\apple interview prep.txt";
 		List<String> lines = new LinkedList<>();
 		try {
-//			Files.lines(Path.of(path)).forEach(lines::add);    // Path.of(String s) java 11
-			Path path = new File(filePath).toPath();
-			Files.lines(path).forEach(lines::add);
+//			Files.lines(Path.of(path)).forEach(lines::add); // Path.of(String s) java 11
+			Path path = new File(filePath).toPath(); // File.toPath() java 7
+			Files.lines(path).forEach(lines::add); // Stream<String> java.nio.file.Files.lines(Path path) java 8
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -332,7 +332,7 @@ public class Streams {
 		lines.forEach(System.out::println);
 	}
 
-	/*
+	/**
 	 * limit() is a stateful intermediate operation that maintains some state to
 	 * count the current result size and can be used to limit the streams
 	 */
